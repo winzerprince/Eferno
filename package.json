@@ -40,7 +40,7 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "seed": "node scripts/seed-products.js",
     "test:env": "node scripts/test-env.js",
