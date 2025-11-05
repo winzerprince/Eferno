@@ -1,56 +1,24 @@
 import { useState } from "react";
-import { AuthProvider, useAuth } from "./lib/auth";
-import { AuthForm } from "./components/AuthForm";
 import { ThemeProvider, useTheme } from "./components/ThemeProvider";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
-import { Moon, Sun, Sparkles, Menu } from "lucide-react";
-import { Button } from "./components/ui/button";
 import { AskTab } from "./components/AskTab";
 import { StoreTab } from "./components/StoreTab";
-import { ConversationDrawer } from "./components/ConversationDrawer";
-import { Loader2 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
+import { Moon, Sun, Sparkles } from "lucide-react";
+import { Button } from "./components/ui/button";
 
 function AppContent() {
   const { theme, toggleTheme } = useTheme();
-  const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("ask");
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <AuthForm />;
-  }
-
-  const handleSelectConversation = (conversationId: string) => {
-    setCurrentConversationId(conversationId);
-    setActiveTab("ask");
-  };
 
   return (
     <div className="flex flex-col h-screen bg-background text-foreground max-w-md mx-auto">
       {/* App Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background sticky top-0 z-10">
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setDrawerOpen(true)}
-            className="rounded-full"
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
-          <span className="text-xl font-semibold">Eferno</span>
+          <span className="text-xl">Eferno</span>
         </div>
         <Button
           variant="ghost"
@@ -84,32 +52,21 @@ function AppContent() {
         </TabsList>
 
         <TabsContent value="ask" className="flex-1 m-0 overflow-hidden">
-          <AskTab conversationId={currentConversationId} />
+          <AskTab />
         </TabsContent>
 
         <TabsContent value="store" className="flex-1 m-0 overflow-hidden">
           <StoreTab />
         </TabsContent>
       </Tabs>
-
-      {/* Conversation History Drawer */}
-      <ConversationDrawer
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
-        onSelectConversation={handleSelectConversation}
-        currentConversationId={currentConversationId}
-      />
     </div>
   );
 }
 
 export default function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <AppContent />
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
-
