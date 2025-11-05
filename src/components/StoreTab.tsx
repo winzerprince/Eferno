@@ -93,21 +93,23 @@ export function StoreTab() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg hover:border-primary/50 transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
               >
                 <div className="aspect-square bg-muted relative overflow-hidden">
                   <LazyLoadImage
                     src={product.image_url}
                     alt={product.name}
-                    effect="blur"
+                    effect="opacity"
                     className="w-full h-full object-cover"
+                    wrapperClassName="w-full h-full"
+                    threshold={100}
                   />
                 </div>
                 <div className="p-3">
-                  <h3 className="font-medium text-sm line-clamp-2 mb-1">{product.name}</h3>
-                  <div className="flex items-center gap-1 mb-2">
+                  <h3 className="font-medium text-sm line-clamp-2 mb-1 hover:text-primary transition-colors">{product.name}</h3>
+                  <div className="flex items-center gap-1 mb-2 bg-yellow-500/10 px-2 py-0.5 rounded-full w-fit">
                     <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
-                    <span className="text-xs text-muted-foreground">{product.rating.toFixed(1)}</span>
+                    <span className="text-xs font-medium">{product.rating.toFixed(1)}</span>
                   </div>
                   <p className="text-sm font-semibold text-primary">{formatPrice(product.price)}</p>
                 </div>

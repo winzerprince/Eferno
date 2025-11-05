@@ -108,8 +108,10 @@ function generateProduct(category) {
   const productName = `${adjective} ${category.charAt(0).toUpperCase() + category.slice(1)}`;
   const brand = faker.company.name().split(' ')[0];
   
-  // Use Unsplash for images
-  const imageUrl = `https://source.unsplash.com/800x600/?${category}`;
+  // Use high-quality Unsplash images with specific dimensions (1200x1200 for crisp display)
+  // Using random query parameter to get different images for same category
+  const randomSeed = faker.number.int({ min: 1000, max: 9999 });
+  const imageUrl = `https://source.unsplash.com/1200x1200/?${category}&sig=${randomSeed}`;
   
   return {
     name: `${brand} ${productName}`,

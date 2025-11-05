@@ -16,6 +16,7 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState("ask");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState<string | undefined>();
+  const [conversationKey, setConversationKey] = useState(0); // Add key to force re-render when needed
 
   if (loading) {
     return (
@@ -31,6 +32,12 @@ function AppContent() {
 
   const handleSelectConversation = (conversationId: string) => {
     setCurrentConversationId(conversationId);
+    setActiveTab("ask");
+  };
+
+  const handleNewChat = () => {
+    setCurrentConversationId(undefined);
+    setConversationKey(prev => prev + 1); // Force re-render with new key
     setActiveTab("ask");
   };
 
@@ -84,7 +91,10 @@ function AppContent() {
         </TabsList>
 
         <TabsContent value="ask" className="flex-1 m-0 overflow-hidden">
-          <AskTab conversationId={currentConversationId} />
+          <AskTab 
+            key={conversationKey} 
+            conversationId={currentConversationId} 
+          />
         </TabsContent>
 
         <TabsContent value="store" className="flex-1 m-0 overflow-hidden">
@@ -97,6 +107,7 @@ function AppContent() {
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
         onSelectConversation={handleSelectConversation}
+        onNewChat={handleNewChat}
         currentConversationId={currentConversationId}
       />
     </div>

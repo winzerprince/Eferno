@@ -11,8 +11,8 @@ import {
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
-import { Avatar, AvatarFallback } from './ui/avatar';
-import { Search, MessageSquare, X, LogOut, Settings, Loader2 } from 'lucide-react';
+import { Search, MessageSquare, X, PlusCircle, Loader2, Settings as SettingsIcon } from 'lucide-react';
+import { Settings } from './Settings';
 
 type Conversation = {
   id: string;
@@ -24,6 +24,7 @@ type ConversationDrawerProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelectConversation: (conversationId: string) => void;
+  onNewChat: () => void;
   currentConversationId?: string;
 };
 
@@ -31,18 +32,14 @@ export function ConversationDrawer({
   open,
   onOpenChange,
   onSelectConversation,
+  onNewChat,
   currentConversationId,
 }: ConversationDrawerProps) {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (open && user) {
-      fetchConversations();
-    }
-  }, [open, user]);
+  const [showSettings, setShowSettings] = useState(false);
 
   const fetchConversations = async () => {
     if (!user) return;
@@ -64,19 +61,16 @@ export function ConversationDrawer({
     }
   };
 
+  useEffect(() => {
+    if (open && user) {
+      fetchConversations();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, user]);
+
   const filteredConversations = conversations.filter((conv) =>
     conv.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const getInitials = (name?: string) => {
-    if (!name) return 'U';
-    return name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -93,12 +87,27 @@ export function ConversationDrawer({
     return date.toLocaleDateString();
   };
 
+  const handleNewChat = () => {
+    onNewChat();
+    onOpenChange(false);
+  };
+
+  if (showSettings) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange} direction="left">
+        <DrawerContent className="h-full w-[85vw] max-w-sm left-0">
+          <Settings onBack={() => setShowSettings(false)} />
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="h-[96vh] max-h-[96vh]">
+    <Drawer open={open} onOpenChange={onOpenChange} direction="left">
+      <DrawerContent className="h-full w-[85vw] max-w-sm left-0">
         <DrawerHeader className="border-b border-border pb-4">
           <div className="flex items-center justify-between mb-4">
-            <DrawerTitle>Conversations</DrawerTitle>
+            <DrawerTitle>Chats</DrawerTitle>
             <DrawerClose asChild>
               <Button variant="ghost" size="icon">
                 <X className="w-5 h-5" />
@@ -106,31 +115,8 @@ export function ConversationDrawer({
             </DrawerClose>
           </div>
 
-          {/* Profile Section */}
-          <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-            <Avatar>
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {getInitials(user?.user_metadata?.full_name || user?.email)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">
-                {user?.user_metadata?.full_name || 'User'}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => signOut()}
-              title="Sign out"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
-
           {/* Search Bar */}
-          <div className="relative mt-4">
+          <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search conversations..."
@@ -139,6 +125,16 @@ export function ConversationDrawer({
               className="pl-9"
             />
           </div>
+
+          {/* New Chat Button */}
+          <Button
+            onClick={handleNewChat}
+            className="w-full mt-3"
+            variant="default"
+          >
+            <PlusCircle className="w-4 h-4 mr-2" />
+            New Chat
+          </Button>
         </DrawerHeader>
 
         {/* Conversations List */}
@@ -186,6 +182,18 @@ export function ConversationDrawer({
             </div>
           )}
         </ScrollArea>
+
+        {/* Settings Button at Bottom */}
+        <div className="border-t border-border p-4">
+          <Button
+            variant="ghost"
+            onClick={() => setShowSettings(true)}
+            className="w-full justify-start"
+          >
+            <SettingsIcon className="w-4 h-4 mr-2" />
+            Settings
+          </Button>
+        </div>
       </DrawerContent>
     </Drawer>
   );

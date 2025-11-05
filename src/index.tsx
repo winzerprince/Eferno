@@ -4,6 +4,14 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// Initialize theme from localStorage
+const savedTheme = localStorage.getItem('theme') || 'dark';
+if (savedTheme === 'dark') {
+  document.documentElement.classList.add('dark');
+} else {
+  document.documentElement.classList.remove('dark');
+}
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );

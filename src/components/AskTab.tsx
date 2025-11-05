@@ -4,8 +4,8 @@ import { supabase, type Product } from '../lib/supabase';
 import { getProductRecommendations, type ProductRecommendation } from '../lib/gemini';
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Send, Loader2, Star, Bot, User } from 'lucide-react';
+import { Textarea } from './ui/textarea';
+import { Send, Star, Bot, User } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -35,6 +35,8 @@ export function AskTab({ conversationId }: AskTabProps) {
   const [loading, setLoading] = useState(false);
   const [currentConversationId, setCurrentConversationId] = useState<string | undefined>(conversationId);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const hasLoadedConversation = useRef(false); // Track if we've loaded a conversation
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -43,9 +45,23 @@ export function AskTab({ conversationId }: AskTabProps) {
   }, [messages]);
 
   useEffect(() => {
+    // Only load conversation if it's different and we haven't loaded it yet
     if (conversationId && conversationId !== currentConversationId) {
       loadConversation(conversationId);
       setCurrentConversationId(conversationId);
+      hasLoadedConversation.current = true;
+    } else if (conversationId === undefined && currentConversationId !== undefined) {
+      // New chat - reset messages only when explicitly requested
+      setMessages([
+        {
+          id: '0',
+          role: 'assistant',
+          content: "Hi! I'm your shopping assistant. Tell me what you're looking for - describe the product, your budget, or any specific features you need, and I'll find the best options for you! 🛍️",
+          timestamp: new Date(),
+        },
+      ]);
+      setCurrentConversationId(undefined);
+      hasLoadedConversation.current = false;
     }
   }, [conversationId]);
 
@@ -126,7 +142,7 @@ export function AskTab({ conversationId }: AskTabProps) {
   const handleSend = async () => {
     if (!input.trim() || loading || !user) return;
 
-    const userQuery = input;
+    const userQuery = input.trim();
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -134,9 +150,17 @@ export function AskTab({ conversationId }: AskTabProps) {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    // Clear input immediately
     setInput('');
     setLoading(true);
+
+    // Reset textarea height
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+
+    // Add user message to display immediately
+    setMessages((prev) => [...prev, userMessage]);
 
     try {
       // Create or use existing conversation
@@ -202,28 +226,36 @@ export function AskTab({ conversationId }: AskTabProps) {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    // Auto-resize textarea
+    e.target.style.height = 'auto';
+    e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px';
+  };
+
   return (
     <div className="flex flex-col h-full">
       {/* Messages Area */}
       <ScrollArea className="flex-1 px-4 py-4" ref={scrollRef}>
         <div className="space-y-4 max-w-3xl mx-auto">
-          {messages.map((message) => (
+          {messages.map((message, index) => (
             <div
               key={message.id}
-              className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}
+              style={{ animationDelay: `${index * 50}ms` }}
             >
               {message.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 animate-in zoom-in duration-300">
                   <Bot className="w-5 h-5 text-primary-foreground" />
                 </div>
               )}
               
               <div className={`flex flex-col gap-2 max-w-[80%]`}>
                 <div
-                  className={`rounded-2xl px-4 py-2 ${
+                  className={`rounded-2xl px-4 py-2 transition-all duration-200 hover:scale-[1.02] ${
                     message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted shadow-sm'
                   }`}
                 >
                   <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
@@ -236,16 +268,17 @@ export function AskTab({ conversationId }: AskTabProps) {
                 {/* Product Recommendations */}
                 {message.recommendations && message.recommendations.length > 0 && (
                   <div className="space-y-2">
-                    {message.recommendations.map((rec) => (
+                    {message.recommendations.map((rec, recIndex) => (
                       <div
                         key={rec.id}
-                        className="bg-card border border-border rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer"
+                        className="bg-card border border-border rounded-lg p-3 hover:shadow-lg hover:border-primary/50 transition-all duration-200 cursor-pointer transform hover:-translate-y-0.5 animate-in fade-in slide-in-from-bottom-1"
+                        style={{ animationDelay: `${(recIndex + 1) * 100}ms` }}
                       >
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <h4 className="font-medium text-sm line-clamp-1">{rec.name}</h4>
-                          <div className="flex items-center gap-1 flex-shrink-0">
+                          <div className="flex items-center gap-1 flex-shrink-0 bg-yellow-500/10 px-2 py-0.5 rounded-full">
                             <Star className="w-3 h-3 fill-yellow-500 text-yellow-500" />
-                            <span className="text-xs">{rec.rating.toFixed(1)}</span>
+                            <span className="text-xs font-medium">{rec.rating.toFixed(1)}</span>
                           </div>
                         </div>
                         <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
@@ -261,7 +294,7 @@ export function AskTab({ conversationId }: AskTabProps) {
               </div>
 
               {message.role === 'user' && (
-                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 animate-in zoom-in duration-300">
                   <User className="w-5 h-5 text-secondary-foreground" />
                 </div>
               )}
@@ -269,12 +302,16 @@ export function AskTab({ conversationId }: AskTabProps) {
           ))}
 
           {loading && (
-            <div className="flex gap-3 justify-start">
+            <div className="flex gap-3 justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                 <Bot className="w-5 h-5 text-primary-foreground" />
               </div>
-              <div className="bg-muted rounded-2xl px-4 py-3">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              <div className="bg-muted rounded-2xl px-4 py-3 shadow-sm">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                  <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                </div>
               </div>
             </div>
           )}
@@ -283,20 +320,22 @@ export function AskTab({ conversationId }: AskTabProps) {
 
       {/* Input Area */}
       <div className="border-t border-border bg-background p-4">
-        <div className="flex gap-2 max-w-3xl mx-auto">
-          <Input
+        <div className="flex gap-2 items-end max-w-3xl mx-auto">
+          <Textarea
+            ref={textareaRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyPress}
             placeholder="Describe what you're looking for..."
             disabled={loading}
-            className="flex-1"
+            className="flex-1 min-h-[44px] max-h-[150px] resize-none"
+            rows={1}
           />
           <Button
             onClick={handleSend}
             disabled={loading || !input.trim()}
             size="icon"
-            className="flex-shrink-0"
+            className="flex-shrink-0 h-11 w-11"
           >
             <Send className="w-4 h-4" />
           </Button>
