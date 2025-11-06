@@ -3,7 +3,7 @@ import { AuthProvider, useAuth } from "./lib/auth";
 import { AuthForm } from "./components/AuthForm";
 import { ThemeProvider, useTheme } from "./components/ThemeProvider";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
-import { Moon, Sun, Sparkles, Menu } from "lucide-react";
+import { Moon, Sun, Menu } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { AskTab } from "./components/AskTab";
 import { StoreTab } from "./components/StoreTab";
@@ -42,7 +42,7 @@ function AppContent() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground max-w-md mx-auto">
+    <div className="flex flex-col h-screen bg-background text-foreground w-full max-w-md sm:max-w-2xl lg:max-w-7xl mx-auto">
       {/* App Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-background sticky top-0 z-10">
         <div className="flex items-center gap-2">
@@ -54,10 +54,9 @@ function AppContent() {
           >
             <Menu className="w-5 h-5" />
           </Button>
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="h-10 flex items-center">
+            <img src="/logo.png" alt="Eferno" className="h-full object-contain" />
           </div>
-          <span className="text-xl font-semibold">Eferno</span>
         </div>
         <Button
           variant="ghost"

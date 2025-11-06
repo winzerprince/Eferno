@@ -11,42 +11,48 @@
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 239 82% 67%;
+    /* Eferno Orange - Primary brand color from logo #EF7705 */
+    --primary: 24 98% 48%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
+    /* Tan/Beige secondary color from logo #B19F80 */
+    --secondary: 34 24% 70%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Eferno Green - Accent color from logo #284732 */
+    --accent: 144 43% 22%;
+    --accent-foreground: 0 0% 98%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 239 82% 67%;
+    /* Orange ring/focus color */
+    --ring: 24 98% 48%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 247 20% 4%;
+    --background: 144 25% 8%;
     --foreground: 0 0% 96%;
-    --card: 248 21% 9%;
+    --card: 144 20% 12%;
     --card-foreground: 0 0% 96%;
-    --popover: 248 21% 9%;
+    --popover: 144 20% 12%;
     --popover-foreground: 0 0% 96%;
-    --primary: 263 93% 68%;
+    /* Brighter orange for dark mode #DD7603 */
+    --primary: 24 98% 44%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 247 17% 15%;
+    --secondary: 34 18% 30%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 248 17% 12%;
+    --muted: 144 15% 15%;
     --muted-foreground: 0 0% 63%;
-    --accent: 248 17% 12%;
+    /* Slightly lighter green for dark mode */
+    --accent: 144 35% 28%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 63% 57%;
     --destructive-foreground: 0 74% 42%;
-    --border: 248 14% 16%;
-    --input: 248 14% 16%;
-    --ring: 263 70% 50%;
+    --border: 144 14% 18%;
+    --input: 144 14% 18%;
+    --ring: 24 98% 44%;
   }
 }
 

@@ -178,6 +178,9 @@ export function Settings({ onBack }: SettingsProps) {
         {/* About Section */}
         <Card className="p-4">
           <h2 className="text-lg font-semibold mb-4">About</h2>
+          <div className="flex justify-center mb-4">
+            <img src="/logo-with-text.png" alt="Eferno" className="h-16 object-contain" />
+          </div>
           <div className="space-y-2 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">App Name</span>

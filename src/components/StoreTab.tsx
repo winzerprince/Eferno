@@ -3,6 +3,8 @@ import { supabase, type Product } from '../lib/supabase';
 import { ScrollArea } from './ui/scroll-area';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import { Star, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { formatPrice } from '../lib/currency';
 import {
     Select,
     SelectContent,
@@ -10,6 +12,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from './ui/select';
+import { ProductDetails } from './ProductDetails';
 
 const CATEGORIES = [
     'all',
@@ -31,9 +34,11 @@ export function StoreTab() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('all');
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
     useEffect(() => {
         fetchProducts();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedCategory]);
 
     async function fetchProducts() {
@@ -55,14 +60,6 @@ export function StoreTab() {
             setLoading(false);
         }
     }
-
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('en-UG', {
-            style: 'currency',
-            currency: 'UGX',
-            minimumFractionDigits: 0,
-        }).format(price);
-    };
 
     return (
         <div className="flex flex-col h-full">
@@ -90,12 +87,15 @@ export function StoreTab() {
                             <Loader2 className="w-8 h-8 animate-spin text-primary" />
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 gap-4 p-4 pb-20">
-                            {products.map((product) => (
-                                <div
-                                    key={product.id}
-                                    className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg hover:border-primary/50 transition-all duration-200 cursor-pointer transform hover:-translate-y-1"
-                                >
+                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 pb-20">
+                {products.map((product) => (
+                    <motion.div
+                        key={product.id}
+                        whileHover={{ scale: 1.02, y: -4 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setSelectedProduct(product)}
+                        className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg hover:border-primary/50 transition-all duration-200 cursor-pointer"
+                    >
                                     <div className="aspect-square bg-muted relative overflow-hidden">
                                         <LazyLoadImage
                                             src={product.image_url}
@@ -103,7 +103,8 @@ export function StoreTab() {
                                             effect="opacity"
                                             className="w-full h-full object-cover"
                                             wrapperClassName="w-full h-full"
-                                            threshold={100}
+                                            threshold={50}
+                                            placeholderSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Crect fill='%23f3f4f6' width='400' height='400'/%3E%3C/svg%3E"
                                         />
                                     </div>
                                     <div className="p-3">
@@ -114,12 +115,17 @@ export function StoreTab() {
                                         </div>
                                         <p className="text-sm font-semibold text-primary">{formatPrice(product.price)}</p>
                                     </div>
-                                </div>
+                                </motion.div>
                             ))}
                         </div>
                     )}
                 </div>
             </ScrollArea>
+
+            <ProductDetails
+                product={selectedProduct}
+                onClose={() => setSelectedProduct(null)}
+            />
         </div>
     );
 }

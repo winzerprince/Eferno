@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useAuth } from '../lib/auth';
 import { supabase, type Product } from '../lib/supabase';
 import { getProductRecommendations, type ProductRecommendation } from '../lib/gemini';
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
-import { Send, Star, Bot, User } from 'lucide-react';
+import { Send, Star, User } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { ProductDetails } from './ProductDetails';
+import { formatPrice } from '../lib/currency';
 
 type Message = {
     id: string;
@@ -34,6 +37,7 @@ export function AskTab({ conversationId }: AskTabProps) {
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
     const [currentConversationId, setCurrentConversationId] = useState<string | undefined>(conversationId);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const hasLoadedConversation = useRef(false); // Track if we've loaded a conversation
@@ -135,12 +139,21 @@ export function AskTab({ conversationId }: AskTabProps) {
         }
     };
 
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('en-UG', {
-            style: 'currency',
-            currency: 'UGX',
-            minimumFractionDigits: 0,
-        }).format(price);
+    const handleProductClick = async (productId: string) => {
+        try {
+            const { data, error } = await supabase
+                .from('products')
+                .select('*')
+                .eq('id', productId)
+                .single();
+
+            if (error) throw error;
+            if (data) {
+                setSelectedProduct(data);
+            }
+        } catch (error) {
+            console.error('Error fetching product:', error);
+        }
     };
 
     const handleSend = async () => {
@@ -249,8 +262,8 @@ export function AskTab({ conversationId }: AskTabProps) {
                             style={{ animationDelay: `${index * 50}ms` }}
                         >
                             {message.role === 'assistant' && (
-                                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 animate-in zoom-in duration-300">
-                                    <Bot className="w-5 h-5 text-primary-foreground" />
+                                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 animate-in zoom-in duration-300 p-1">
+                                    <img src="/logo.png" alt="Eferno" className="w-full h-full object-contain" />
                                 </div>
                             )}
 
@@ -272,8 +285,11 @@ export function AskTab({ conversationId }: AskTabProps) {
                                 {message.recommendations && message.recommendations.length > 0 && (
                                     <div className="space-y-2">
                                         {message.recommendations.map((rec, recIndex) => (
-                                            <div
+                                            <motion.div
                                                 key={rec.id}
+                                                whileHover={{ scale: 1.02, y: -2 }}
+                                                whileTap={{ scale: 0.98 }}
+                                                onClick={() => handleProductClick(rec.id)}
                                                 className="bg-card border border-border rounded-lg p-3 hover:shadow-lg hover:border-primary/50 transition-all duration-200 cursor-pointer transform hover:-translate-y-0.5 animate-in fade-in slide-in-from-bottom-1"
                                                 style={{ animationDelay: `${(recIndex + 1) * 100}ms` }}
                                             >
@@ -290,7 +306,7 @@ export function AskTab({ conversationId }: AskTabProps) {
                                                 <p className="text-sm font-semibold text-primary">
                                                     {formatPrice(rec.price)}
                                                 </p>
-                                            </div>
+                                            </motion.div>
                                         ))}
                                     </div>
                                 )}
@@ -306,8 +322,8 @@ export function AskTab({ conversationId }: AskTabProps) {
 
                     {loading && (
                         <div className="flex gap-3 justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                                <Bot className="w-5 h-5 text-primary-foreground" />
+                            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 p-1">
+                                <img src="/logo.png" alt="Eferno" className="w-full h-full object-contain" />
                             </div>
                             <div className="bg-muted rounded-2xl px-4 py-3 shadow-sm">
                                 <div className="flex gap-1">
@@ -344,6 +360,11 @@ export function AskTab({ conversationId }: AskTabProps) {
                     </Button>
                 </div>
             </div>
+
+            <ProductDetails
+                product={selectedProduct}
+                onClose={() => setSelectedProduct(null)}
+            />
         </div>
     );
 }
