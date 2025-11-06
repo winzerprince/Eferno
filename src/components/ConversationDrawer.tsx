@@ -11,7 +11,7 @@ import {
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
-import { Search, MessageSquare, X, PlusCircle, Loader2, Settings as SettingsIcon } from 'lucide-react';
+import { Search, MessageSquare, X, PlusCircle, Settings as SettingsIcon } from 'lucide-react';
 import { Settings } from './Settings';
 
 type Conversation = {
@@ -140,8 +140,18 @@ export function ConversationDrawer({
         {/* Conversations List */}
         <ScrollArea className="flex-1 px-4">
           {loading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+            <div className="space-y-3 py-4">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="w-full p-3 rounded-lg bg-card border border-border">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-muted-foreground/10 rounded animate-pulse" />
+                    <div className="flex-1">
+                      <div className="h-3 bg-muted-foreground/10 rounded w-3/4 animate-pulse mb-2" />
+                      <div className="h-2 bg-muted-foreground/10 rounded w-1/3 animate-pulse" />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           ) : filteredConversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">

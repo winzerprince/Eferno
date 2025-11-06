@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase, type Product } from '../lib/supabase';
 import { ScrollArea } from './ui/scroll-area';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
-import { Star, Loader2 } from 'lucide-react';
+import { Star } from 'lucide-react';
+import { SkeletonCard } from './ui/Skeleton';
 import { motion } from 'framer-motion';
 import { formatPrice } from '../lib/currency';
 import {
@@ -83,8 +84,12 @@ export function StoreTab() {
             <ScrollArea className="flex-1 h-full">
                 <div className="h-full">
                     {loading ? (
-                        <div className="flex items-center justify-center h-64">
-                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 pb-20">
+                            {[...Array(8)].map((_, i) => (
+                                <div key={i}>
+                                    <SkeletonCard />
+                                </div>
+                            ))}
                         </div>
                     ) : (
                                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 pb-20">

@@ -322,15 +322,11 @@ export function AskTab({ conversationId }: AskTabProps) {
 
                     {loading && (
                         <div className="flex gap-3 justify-start animate-in fade-in slide-in-from-bottom-2 duration-300">
-                            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0 p-1">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 p-1">
                                 <img src="/logo.png" alt="Eferno" className="w-full h-full object-contain" />
                             </div>
                             <div className="bg-muted rounded-2xl px-4 py-3 shadow-sm">
-                                <div className="flex gap-1">
-                                    <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                                    <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                                    <div className="w-2 h-2 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                                </div>
+                                <div className="h-3 bg-muted-foreground/10 rounded w-24 animate-pulse" />
                             </div>
                         </div>
                     )}

@@ -8,7 +8,7 @@ import { Button } from "./components/ui/button";
 import { AskTab } from "./components/AskTab";
 import { StoreTab } from "./components/StoreTab";
 import { ConversationDrawer } from "./components/ConversationDrawer";
-import { Loader2 } from "lucide-react";
+ 
 
 function AppContent() {
   const { theme, toggleTheme } = useTheme();
@@ -21,7 +21,20 @@ function AppContent() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="w-full max-w-sm p-4">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-muted-foreground/10 rounded animate-pulse" />
+            <div className="flex-1">
+              <div className="h-3 bg-muted-foreground/10 rounded w-3/4 animate-pulse mb-2" />
+              <div className="h-2 bg-muted-foreground/10 rounded w-1/2 animate-pulse" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-3 bg-muted-foreground/10 rounded w-full animate-pulse" />
+            <div className="h-3 bg-muted-foreground/10 rounded w-full animate-pulse" />
+            <div className="h-3 bg-muted-foreground/10 rounded w-2/3 animate-pulse" />
+          </div>
+        </div>
       </div>
     );
   }
