@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Minus, Plus, ShoppingCart, Package, Check, Star, Sparkles } from 'lucide-react';
 import { Button } from './ui/button';
 import { type Product } from '../lib/supabase';
-import { formatPrice, ugxToUsd } from '../lib/currency';
+import { formatPrice, ugxToUsd, formatUsd } from '../lib/currency';
 
 type ProductDetailsProps = {
     product: Product | null;
@@ -139,7 +139,7 @@ export function ProductDetails({ product, onClose }: ProductDetailsProps) {
                                 transition={{ delay: 0.1 }}
                             >
                                 <div className="text-3xl font-bold text-primary">
-                                    {formatPrice(basePrice)}
+                                    {formatUsd(basePrice)}
                                 </div>
                                 <div className="text-sm text-muted-foreground mt-1">
                                     Base price: {formatPrice(product.price)} per unit
@@ -257,11 +257,11 @@ export function ProductDetails({ product, onClose }: ProductDetailsProps) {
                                 >
                                     <div className="flex justify-between text-muted-foreground">
                                         <span>Subtotal</span>
-                                        <span>{formatPrice(basePrice)}</span>
+                                        <span>{formatUsd(basePrice)}</span>
                                     </div>
                                     <div className="flex justify-between text-muted-foreground">
                                         <span>Delivery Fee</span>
-                                        <span>{formatPrice(deliveryFee)}</span>
+                                        <span>{formatUsd(deliveryFee)}</span>
                                     </div>
                                     <div className="h-px bg-border" />
                                 </motion.div>
@@ -279,7 +279,7 @@ export function ProductDetails({ product, onClose }: ProductDetailsProps) {
                                 transition={{ duration: 0.2 }}
                                 className="text-2xl font-bold text-primary"
                             >
-                                {formatPrice(totalPrice)}
+                                {formatUsd(totalPrice)}
                             </motion.span>
                         </div>
 

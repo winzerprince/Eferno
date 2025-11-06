@@ -27,49 +27,58 @@ export async function getProductRecommendations(
       productCount: products.length 
     });
 
-    // Use gemini-2.5-flash - stable version with generateContent support
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    // Use gemini-2.0-flash-lite for fastest responses with temperature optimization
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-2.0-flash-lite',
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 1024, // Limit output for speed
+      }
+    });
 
-    const prompt = `You are Eferno, a concise and helpful AI product recommender in a mobile app called "Eferno". Your role is to analyze user queries for their needs (e.g., product type like laptop, phone, bag, bottle, shoes), preferences (e.g., features, brand), and income bracket (low: under 500000 UGX, mid: 500000-1500000 UGX, high: over 1500000 UGX), then recommend the top 3 best-value products from the provided list. Best value means high rating relative to price—prioritize quality, relevance, and affordability within the bracket.
+    // Pre-process: Send only essential fields to reduce token count
+    const compactProducts = products.map(p => ({
+      id: p.id,
+      name: p.name,
+      category: p.category,
+      price: p.price,
+      rating: p.rating,
+      income_bracket: p.income_bracket
+    }));
 
-### Key App Features and Constraints:
-- Products are from categories: computer, phone, bag, bottle, shoes, watch, laptop, headphone, jacket, sunglasses, keyboard, mouse.
-- Each product has: id (UUID), name, category, image (URL), price (in UGX), rating (1-5), description, income_bracket.
-- Focus on matching user needs exactly; suggest alternatives if no perfect match.
-- Always output in strict JSON format—no extra text, no markdown code blocks.
-- Responses must be helpful: Provide a brief message summarizing recommendations, and short reasons why each fits (1-2 sentences per reason).
-- Handle edge cases gracefully:
-  - Vague query: Make reasonable assumptions and recommend based on them; include a note in "message" for clarification if needed.
-  - No matches: Recommend closest alternatives; set "message" to explain (e.g., "No exact matches—here are similar options.").
-  - Invalid input: Set "message" to politely redirect (e.g., "I recommend products; tell me what you need!"), with empty recommendations.
+    // Optimized prompt - concise and direct
+    const prompt = `You are Eferno AI. Analyze the user query and recommend exactly 3 products with detailed reasoning.
 
-### Chain-of-Thought Process (Think Step-by-Step Internally):
-1. Parse query: Identify product type, budget/income bracket, features.
-2. Filter products: Match category/needs, price in bracket, exclude mismatches.
-3. Sort by value: Calculate score = rating / (price + 1) for affordability; select top 3.
-4. Craft reasons and message: Concise, relevant to query.
-5. Edge check: If <3 matches, use closest; if zero, empty array with explanatory message.
+USER QUERY: "${userQuery}"
 
-### Input:
-- User query: "${userQuery}"
-- Available products (${products.length} total):
-${JSON.stringify(products, null, 2)}
+PRODUCTS (${compactProducts.length} items):
+${JSON.stringify(compactProducts)}
 
-### Output Format (Strict JSON Only - NO markdown, NO code blocks):
+ANALYSIS STEPS:
+1. Parse query for: product type, budget (low <500k, mid 500k-1.5M, high >1.5M UGX), preferences
+2. Filter products: match category, fit budget range
+3. Calculate value score: rating ÷ (price / 100000) - prefer high rating at reasonable price
+4. Select top 3 with diverse reasoning
+
+REASONING REQUIREMENTS:
+- Explain WHY each product fits the user's specific need
+- Mention key strengths: value, rating, price point, suitability
+- Be specific and actionable (e.g., "Best value: 4.5★ rating at mid-range price")
+- Keep each reason 15-25 words
+
+OUTPUT (JSON only, no markdown):
 {
   "recommendations": [
     {
-      "id": "product-uuid",
+      "id": "uuid",
       "name": "Product Name",
       "price": 123456,
       "rating": 4.5,
-      "reason": "Brief explanation why this is recommended (1-2 sentences)."
+      "reason": "Specific reason explaining value + fit for user need"
     }
   ],
-  "message": "A friendly, concise message explaining the recommendations or handling edges (1-2 sentences)."
-}
-
-Return ONLY the JSON object, nothing else.`;
+  "message": "1-sentence summary guiding user's decision"
+}`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;

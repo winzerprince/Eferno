@@ -6,7 +6,7 @@ import { getProductRecommendations, type ProductRecommendation } from '../lib/ge
 import { ScrollArea } from './ui/scroll-area';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
-import { Send, Star, User } from 'lucide-react';
+import { Send, Star, User, Lightbulb } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ProductDetails } from './ProductDetails';
@@ -194,11 +194,14 @@ export function AskTab({ conversationId }: AskTabProps) {
                 await saveMessage(convId, userMessage);
             }
 
-            // Fetch relevant products from Supabase
+            // Fetch products with smart filtering for faster responses
+            // Limit to 50 products with good ratings to reduce token count
             const { data: products, error } = await supabase
                 .from('products')
-                .select('*')
-                .limit(100);
+                .select('id, name, category, price, rating, income_bracket, description, image_url')
+                .gte('rating', 3.5) // Only fetch well-rated products
+                .order('rating', { ascending: false })
+                .limit(50); // Reduced from 100 for speed
 
             if (error) throw error;
 
@@ -300,9 +303,12 @@ export function AskTab({ conversationId }: AskTabProps) {
                                                         <span className="text-xs font-medium">{rec.rating.toFixed(1)}</span>
                                                     </div>
                                                 </div>
-                                                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                                                    {rec.reason}
-                                                </p>
+                                                <div className="flex items-start gap-1.5 mb-2">
+                                                    <Lightbulb className="w-3.5 h-3.5 text-primary mt-0.5 flex-shrink-0" />
+                                                    <p className="text-xs text-muted-foreground line-clamp-3">
+                                                        {rec.reason}
+                                                    </p>
+                                                </div>
                                                 <p className="text-sm font-semibold text-primary">
                                                     {formatPrice(rec.price)}
                                                 </p>

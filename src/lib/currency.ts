@@ -24,3 +24,17 @@ export function formatPrice(ugxPrice: number): string {
 export function ugxToUsd(ugxAmount: number): number {
   return ugxAmount / UGX_TO_USD_RATE;
 }
+
+/**
+ * Formats a USD amount as currency string (no conversion)
+ * @param usdAmount - Amount already in US Dollars
+ * @returns Formatted USD price string
+ */
+export function formatUsd(usdAmount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(usdAmount);
+}
